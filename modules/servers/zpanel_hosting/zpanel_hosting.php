@@ -86,12 +86,20 @@ function zpanel_hosting_ChangePassword(array $params) {
     return $res['success'] ? 'success' : ($res['message'] ?: 'Şifre değiştirilemedi');
 }
 
+function zpanel_hosting_ChangePackage(array $params) {
+    $mgr = new Manager($params);
+    $res = $mgr->changePackage();
+    return $res['success'] ? 'success' : ($res['message'] ?: 'Paket güncellenemedi');
+}
+
 function zpanel_hosting_ClientArea(array $params) {
     $mgr = new Manager($params);
     $tplVars = $mgr->getClientAreaParams();
 
+    $templateFile = file_exists(__DIR__ . '/templates/overview.tpl') ? 'templates/overview.tpl' : 'clientarea.tpl';
+
     return [
-        'tabOverviewReplacementTemplate' => 'clientarea.tpl',
+        'tabOverviewReplacementTemplate' => $templateFile,
         'templateVariables' => $tplVars,
     ];
 }

@@ -163,6 +163,20 @@ class Manager
         return $this->call('PATCH', "customers/{$customerId}", ['password' => $newPass]);
     }
 
+    public function changePackage(): array
+    {
+        $customerId = $this->findCustomerId($this->params['username']);
+        if (!$customerId) {
+            return ['success' => false, 'message' => 'Kullanıcı hesabı bulunamadı.'];
+        }
+        $payload = [
+            'package'      => $this->params['configoption1'] ?? 'Standard-Hosting',
+            'quotaMb'      => (int)($this->params['configoption3'] ?? 10240),
+            'bandwidthMb'  => (int)($this->params['configoption4'] ?? 102400),
+        ];
+        return $this->call('PATCH', "customers/{$customerId}", $payload);
+    }
+
     public function getClientAreaParams(): array
     {
         $domain = $this->params['domain'] ?? '';
