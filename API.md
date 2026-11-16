@@ -119,3 +119,4 @@ Accept: application/json
   "message": "Müşteri ve ilişkili tüm alan adları/veritabanları silindi."
 }
 ```
+

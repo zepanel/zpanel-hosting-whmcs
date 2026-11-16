@@ -18,3 +18,4 @@ $_LANG['zpanel_hosting_webmail'] = "Webmail Inbox";
 $_LANG['zpanel_hosting_databases'] = "Databases (MariaDB)";
 $_LANG['zpanel_hosting_reseller_panel'] = "Reseller Management Panel";
 $_LANG['zpanel_hosting_login_button'] = "Login to zPanel (:8026)";
+

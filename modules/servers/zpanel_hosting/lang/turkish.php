@@ -18,3 +18,4 @@ $_LANG['zpanel_hosting_webmail'] = "Webmail Gelen Kutusu";
 $_LANG['zpanel_hosting_databases'] = "Veritabanları (MariaDB)";
 $_LANG['zpanel_hosting_reseller_panel'] = "Bayi (Reseller) Yönetim Paneli";
 $_LANG['zpanel_hosting_login_button'] = "zPanel Giriş (:8026)";
+
