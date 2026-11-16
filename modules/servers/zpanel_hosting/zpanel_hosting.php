@@ -96,7 +96,7 @@ function zpanel_hosting_AdminLink(array $params) {
     $port = 8036;
     $url = "https://{$host}:{$port}";
     return sprintf(
-        '<a href="%s" target="_blank" class="btn btn-default btn-sm" style="display:inline-flex;align-items:center;gap:5px;">' .
+        '<a href="%s" target="_blank" class="btn btn-default btn-sm">' .
         '<i class="fas fa-external-link-alt"></i> zPanel Root/Bayi Paneline Giriş Yap (:8036)' .
         '</a>',
         htmlspecialchars($url, ENT_QUOTES, 'UTF-8')
@@ -111,8 +111,8 @@ function zpanel_hosting_AdminServicesTabFields(array $params) {
 
     return [
         'zPanel Durumu' => '<span class="label label-success">Aktif &amp; Senkronize</span>',
-        'Panel Portu'   => '<strong style="font-family:monospace;">' . (int)$panelPort . ' / HTTPS</strong>' . ($isReseller ? ' (Bayi Yetkili)' : ' (Bireysel)'),
-        'Webmail Portu' => '<strong style="font-family:monospace;">8046 / HTTPS</strong>',
+        'Panel Portu'   => '<code>' . (int)$panelPort . ' / HTTPS</code>' . ($isReseller ? ' (Bayi Yetkili)' : ' (Bireysel)'),
+        'Webmail Portu' => '<code>8046 / HTTPS</code>',
         'Doğrudan Giriş' => '<a href="https://' . htmlspecialchars($serverIp, ENT_QUOTES, 'UTF-8') . ':' . (int)$panelPort . '" target="_blank" class="btn btn-xs btn-info"><i class="fas fa-sign-in-alt"></i> Panele Git</a>',
     ];
 }
