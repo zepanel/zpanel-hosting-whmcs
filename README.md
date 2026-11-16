@@ -1,4 +1,4 @@
-﻿# zPanel Web Hosting & Reseller Module for WHMCS
+# zPanel Web Hosting & Reseller Module for WHMCS
 
 zPanel Web Hosting ve Bayi (Reseller) yönetim modülü. Müşteri hesapları, E-Posta yönetimi ve Webmail erişimi.
 
