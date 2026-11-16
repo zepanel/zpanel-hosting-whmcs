@@ -206,4 +206,78 @@ class Manager
             'service_id'    => $this->params['serviceid'],
         ];
     }
+
+    public function testConnection(): array
+    {
+        $res = $this->call('GET', 'status');
+        if ($res['success']) {
+            return ['success' => true];
+        }
+        // Fallback: check customers list
+        $resCust = $this->call('GET', 'customers?limit=1');
+        if ($resCust['success']) {
+            return ['success' => true];
+        }
+        return ['success' => false, 'message' => $res['message'] ?: ($resCust['message'] ?: 'Bağlantı kurulamadı.')];
+    }
+
+    public function getUsage(): array
+    {
+        $username = $this->params['username'] ?? '';
+        $customerId = $this->findCustomerId($username);
+        if ($customerId) {
+            $res = $this->call('GET', "customers/{$customerId}/usage");
+            if ($res['success'] && !empty($res['data'])) {
+                return [
+                    'diskusage' => (float)($res['data']['diskUsageMb'] ?? $res['data']['diskusage'] ?? 0),
+                    'disklimit' => (float)($res['data']['diskLimitMb'] ?? $res['data']['disklimit'] ?? ($this->params['configoption3'] ?? 10240)),
+                    'bwusage'   => (float)($res['data']['bwUsageMb'] ?? $res['data']['bwusage'] ?? 0),
+                    'bwlimit'   => (float)($res['data']['bwLimitMb'] ?? $res['data']['bwlimit'] ?? ($this->params['configoption4'] ?? 102400)),
+                ];
+            }
+        }
+        return [
+            'diskusage' => 0,
+            'disklimit' => (float)($this->params['configoption3'] ?? 10240),
+            'bwusage'   => 0,
+            'bwlimit'   => (float)($this->params['configoption4'] ?? 102400),
+        ];
+    }
+
+    public function getPackages(): array
+    {
+        $res = $this->call('GET', 'packages');
+        if ($res['success'] && !empty($res['data']['items'])) {
+            $pkgs = [];
+            foreach ($res['data']['items'] as $item) {
+                $name = $item['name'] ?? $item['id'] ?? '';
+                if ($name) {
+                    $pkgs[$name] = $item['displayName'] ?? $name;
+                }
+            }
+            return $pkgs;
+        }
+        return [
+            'Standard-Hosting' => 'Standard Hosting (10GB / 100GB)',
+            'Pro-Hosting'      => 'Pro Hosting (25GB / 250GB)',
+            'Reseller-Hosting' => 'Reseller Hosting (100GB / 1TB)',
+        ];
+    }
+
+    public function getSingleSignOnUrl(): string
+    {
+        $domain = $this->params['domain'] ?? '';
+        $serverIp = $this->params['serverip'] ?? '';
+        $panelHost = !empty($domain) ? $domain : $serverIp;
+        $isReseller = ($this->params['configoption2'] === 'on' || $this->params['configoption2'] === '1');
+        $panelPort = $isReseller ? 8036 : 8026;
+
+        return "https://{$panelHost}:{$panelPort}/sso?user=" . urlencode($this->params['username'] ?? '');
+    }
+
+    public function getAdminSingleSignOnUrl(): string
+    {
+        $serverIp = $this->params['serverip'] ?: ($this->params['serverhostname'] ?? '127.0.0.1');
+        return "https://{$serverIp}:8036/admin/sso";
+    }
 }
