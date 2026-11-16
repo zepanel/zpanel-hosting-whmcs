@@ -3,88 +3,164 @@
 namespace WHMCS\Module\Server\ZPanelHosting\ZPanel;
 
 /**
- * zPanel Hosting & Reseller Business Logic Manager for WHMCS
- * Inspired by Plesk WHMCS Plugin Architecture
+ * zPanel Web Hosting İş Mantığı Yöneticisi (WHMCS)
+ * zPanel Core API v1 Entegrasyonu
+ * Port Mimarisi: 8056 (API), 8026 (Müşteri Paneli), 8036 (Root), 8046 (Webmail)
  */
 class Manager
 {
     private string $host;
     private string $apiKey;
+    private int $port = 8056;
     private array $params;
 
     public function __construct(array $params)
     {
         $this->params = $params;
-        $this->host = trim($params['serverip'] ?: $params['serverhostname'], '/');
-        $this->apiKey = trim($params['serverpassword'] ?: $params['serveraccesshash']);
+        $this->host = trim($params['serverip'] ?: $params['serverhostname'] ?: $params['domain'] ?? '', '/');
+        $this->apiKey = trim($params['serverpassword'] ?: $params['serveraccesshash'] ?? '');
     }
 
     private function call(string $method, string $uri, array $data = []): array
     {
-        $url = "https://{$this->host}:8056/api/v1/" . ltrim($uri, '/');
+        $cleanUri = ltrim($uri, '/');
+        if (!str_starts_with($cleanUri, 'v1/')) {
+            $cleanUri = 'v1/' . $cleanUri;
+        }
+
+        $url = "https://{$this->host}:{$this->port}/{$cleanUri}";
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+
+        $headers = [
             'Authorization: Bearer ' . $this->apiKey,
             'Content-Type: application/json',
             'Accept: application/json',
-        ]);
+            'User-Agent: WHMCS-zPanel-Hosting/1.0',
+        ];
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 25);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         $method = strtoupper($method);
         if ($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        } elseif ($method === 'PATCH' || $method === 'PUT') {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         } elseif ($method === 'DELETE') {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         }
 
         $res = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err = curl_error($ch);
         curl_close($ch);
 
-        $json = json_decode($res, true);
+        if ($err) {
+            return ['success' => false, 'message' => "Bağlantı Hatası: {$err}", 'code' => 0];
+        }
+
+        $json = json_decode((string)$res, true);
+        $isOk = ($code >= 200 && $code < 300);
+
         return [
-            'success' => ($code >= 200 && $code < 300),
-            'data' => $json['data'] ?? $json,
-            'message' => $json['message'] ?? '',
+            'success' => $isOk,
+            'code' => $code,
+            'data' => $json,
+            'message' => $json['message'] ?? ($isOk ? 'Başarılı' : "HTTP Hata {$code}"),
         ];
+    }
+
+    private function findCustomerId(string $username): ?string
+    {
+        $res = $this->call('GET', "customers?q=" . urlencode($username));
+        if ($res['success'] && !empty($res['data']['items'])) {
+            foreach ($res['data']['items'] as $item) {
+                if (strcasecmp($item['username'], $username) === 0) {
+                    return $item['id'];
+                }
+            }
+        }
+        return null;
     }
 
     public function createAccount(): array
     {
-        return $this->call('POST', 'hosting/accounts', [
-            'domain'      => $this->params['domain'],
-            'username'    => $this->params['username'],
-            'password'    => $this->params['password'],
-            'package'     => $this->params['configoption1'] ?? 'default',
-            'is_reseller' => ($this->params['configoption2'] === 'on' || $this->params['configoption2'] === '1'),
-            'quota_mb'    => (int)($this->params['configoption3'] ?? 10240),
-            'bandwidth_mb'=> (int)($this->params['configoption4'] ?? 102400),
+        $username = $this->params['username'];
+        $password = $this->params['password'];
+        $domain   = $this->params['domain'];
+        $email    = $this->params['clientsdetails']['email'] ?? "{$username}@{$domain}";
+        $fullName = trim(($this->params['clientsdetails']['firstname'] ?? '') . ' ' . ($this->params['clientsdetails']['lastname'] ?? ''));
+
+        // 1. Müşteri Hesabı Aç (POST /v1/customers)
+        $custRes = $this->call('POST', 'customers', [
+            'username'    => $username,
+            'password'    => $password,
+            'displayName' => $fullName ?: $username,
+            'email'       => $email,
         ]);
+
+        if (!$custRes['success']) {
+            return $custRes;
+        }
+
+        $customerId = $custRes['data']['customer']['id'] ?? $this->findCustomerId($username);
+
+        // 2. Alan Adını Ekle (POST /v1/domains)
+        if (!empty($domain) && !empty($customerId)) {
+            $domRes = $this->call('POST', 'domains', [
+                'name'    => $domain,
+                'ownerId' => $customerId,
+                'kind'    => 'domain',
+            ]);
+            if (!$domRes['success']) {
+                return $domRes;
+            }
+        }
+
+        return ['success' => true, 'message' => 'Hosting hesabı ve alan adı başarıyla açıldı.'];
     }
 
     public function suspendAccount(): array
     {
-        return $this->call('POST', "hosting/accounts/{$this->params['username']}/suspend");
+        $customerId = $this->findCustomerId($this->params['username']);
+        if (!$customerId) {
+            return ['success' => true, 'message' => 'Müşteri hesabı bulunamadı.'];
+        }
+        return $this->call('PATCH', "customers/{$customerId}", ['status' => 'suspended']);
     }
 
     public function unsuspendAccount(): array
     {
-        return $this->call('POST', "hosting/accounts/{$this->params['username']}/unsuspend");
+        $customerId = $this->findCustomerId($this->params['username']);
+        if (!$customerId) {
+            return ['success' => true, 'message' => 'Müşteri hesabı bulunamadı.'];
+        }
+        return $this->call('PATCH', "customers/{$customerId}", ['status' => 'active']);
     }
 
     public function terminateAccount(): array
     {
-        return $this->call('DELETE', "hosting/accounts/{$this->params['username']}");
+        $customerId = $this->findCustomerId($this->params['username']);
+        if (!$customerId) {
+            return ['success' => true, 'message' => 'Müşteri hesabı zaten silinmiş.'];
+        }
+        return $this->call('DELETE', "customers/{$customerId}");
     }
 
     public function changePassword(string $newPass): array
     {
-        return $this->call('POST', "hosting/accounts/{$this->params['username']}/change-password", ['password' => $newPass]);
+        $customerId = $this->findCustomerId($this->params['username']);
+        if (!$customerId) {
+            return ['success' => false, 'message' => 'Kullanıcı hesabı bulunamadı.'];
+        }
+        return $this->call('PATCH', "customers/{$customerId}", ['password' => $newPass]);
     }
 
     public function getClientAreaParams(): array
@@ -97,13 +173,7 @@ class Manager
         $panelPort = $isReseller ? 8036 : 8026;
         $webmailPort = 8046;
 
-        $tokenRes = $this->call('POST', 'auth/sso-token', [
-            'username' => $this->params['username'],
-            'is_reseller' => $isReseller,
-        ]);
-        $token = $tokenRes['data']['token'] ?? bin2hex(random_bytes(16));
-
-        $ssoUrl = !empty($panelHost) ? "https://{$panelHost}:{$panelPort}/auth/sso?token={$token}" : '#';
+        $ssoUrl = !empty($panelHost) ? "https://{$panelHost}:{$panelPort}" : '#';
         $webmailUrl = !empty($panelHost) ? "https://{$panelHost}:{$webmailPort}" : '#';
 
         return [
@@ -123,4 +193,3 @@ class Manager
         ];
     }
 }
-
