@@ -223,6 +223,10 @@ function zpanel_hosting_ChangePackage(array $params) {
     return $res['success'] ? 'success' : ($res['message'] ?: 'Paket güncellenemedi');
 }
 
+function zpanel_hosting_AdminServicesTabFieldsSave(array $params) {
+    return 'success';
+}
+
 function zpanel_hosting_ClientArea(array $params) {
     $mgr = new Manager($params);
     $tplVars = $mgr->getClientAreaParams();
