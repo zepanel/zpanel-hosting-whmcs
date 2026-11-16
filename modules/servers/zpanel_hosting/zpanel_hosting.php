@@ -27,7 +27,13 @@ function zpanel_hosting_MetaData() {
         'DefaultSSLPort' => '8056',
         'ServiceSingleSignOnLabel' => 'zPanel Web Hosting Giriş (:8026)',
         'AdminSingleSignOnLabel' => 'zPanel Root / Yönetici Girişi (:8036)',
+        'MetricBilling' => true,
     ];
+}
+
+function zpanel_hosting_MetricProvider(array $params) {
+    require_once __DIR__ . '/lib/ZPanel/MetricsProvider.php';
+    return new \WHMCS\Module\Server\ZPanelHosting\ZPanel\MetricsProvider($params);
 }
 
 function zpanel_hosting_ConfigOptions() {

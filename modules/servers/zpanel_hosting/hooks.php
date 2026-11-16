@@ -50,3 +50,4 @@ add_hook('ClientAreaPrimarySidebar', 10, function (MenuItem $primarySidebar) {
         'attributes' => ['target' => '_blank'],
     ]);
 });
+
