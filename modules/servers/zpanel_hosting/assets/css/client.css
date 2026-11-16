@@ -1,0 +1,215 @@
+/* zPanel Web Hosting & Reseller WHMCS Client Area Stylesheet */
+
+.zp-hosting-wrap {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #0f172a;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.zp-header-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 22px 26px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.zp-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.zp-header-domain {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: #0f172a;
+}
+
+.zp-badge-ver {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.zp-header-meta {
+  font-size: 13.5px;
+  color: #64748b;
+}
+
+.zp-code-val {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.zp-strong-val {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.zp-btn-primary {
+  background: #2563eb;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.zp-btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.zp-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 22px 26px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.zp-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: #1e293b;
+}
+
+.zp-info-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 18px 22px;
+}
+
+.zp-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.zp-info-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.zp-info-col {
+  flex: 1;
+  min-width: 200px;
+}
+
+.zp-info-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.zp-link-port {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+  font-family: ui-monospace, monospace;
+}
+
+.zp-btn-toggle-pwd {
+  border: none;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.zp-btn-toggle-pwd:hover {
+  background: #cbd5e1;
+}
+
+.zp-quick-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.zp-btn-outline {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #0f172a !important;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.zp-btn-outline:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.zp-reseller-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.zp-btn-dark {
+  background: #0f172a;
+  color: #ffffff !important;
+  padding: 8px 18px;
+  border-radius: 8px;
+  text-decoration: none !important;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zp-btn-dark:hover {
+  background: #1e293b;
+}
+
+.zp-desc-text {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
